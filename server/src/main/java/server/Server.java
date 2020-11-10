@@ -12,30 +12,27 @@ import java.util.Vector;
 public class Server {
 
     private AuthService authService;
+    private SimpleAuthService simpleAuthService;
 
     public AuthService getAuthService() { //????
         return authService;
     }
-
-    private ServerSocket server = null;
-    private Socket socket = null;
-    private Scanner scan;
-    private String str;
-    private Vector<ClientHandler> clients;
-    private SimpleAuthService simpleAuthService;
-
-
-
-
-    private static Connection connection;
-    private static Statement stmt;
-    private static PreparedStatement psInsert;
 
     public SimpleAuthService getSimpleAuthService() {
         return simpleAuthService;
     }
 
 
+
+    private ServerSocket server = null;
+    private Socket socket = null;
+    private Scanner scan;
+    private String str;
+    private Vector<ClientHandler> clients;
+
+    private static Connection connection;
+    private static Statement stmt;
+    private static PreparedStatement psInsert;
 
 
     public Server() {
@@ -146,10 +143,4 @@ public class Server {
     public void changeNickname(String nickname, String newNickname) throws SQLException {
         simpleAuthService.changeNickname(nickname, newNickname);
     }
-
-/*    public String getNickByLoginAndPassword(String login, String password) {
-        return simpleAuthService.getNickByLoginAndPassword(login, password);
-    }*/
-
-
 }

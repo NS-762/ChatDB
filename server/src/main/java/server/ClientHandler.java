@@ -41,7 +41,12 @@ public class ClientHandler {
                         if (str.startsWith("/auth")) {
                             String[] token = str.split(" ");
                             if (token.length == 3) {
-                                String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
+
+
+                                String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]); // Вот так не рабоатет
+
+                                /*String nick = server.getSimpleAuthService().getNickByLoginAndPassword(token[1], token[2]);*/ // Вот так работает
+
 
                                 if (nick != null) {
                                     sendMessageClient("/authok " + nick);
