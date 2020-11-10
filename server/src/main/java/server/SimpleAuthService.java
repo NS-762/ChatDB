@@ -1,17 +1,20 @@
 package server;
 
-import com.sun.javafx.binding.StringFormatter;
-import org.sqlite.JDBC;
-
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleAuthService implements AuthService {
 
-    private static Connection connection;
-    private static Statement stmt;
-    private static PreparedStatement psInsert;
+    private Connection connection;
+    private Statement stmt;
+    private PreparedStatement psInsert;
 
+    public SimpleAuthService(Connection connection, Statement stmt, PreparedStatement psInsert) {
+        this.connection = connection;
+        this.stmt = stmt;
+        this.psInsert = psInsert;
+    }
 
     private class UserData {
         String login;
@@ -27,37 +30,67 @@ public class SimpleAuthService implements AuthService {
 
     private List<UserData> users;
 
-    /*public SimpleAuthService() { //массив логинов, паролей, никнеймов
+    public SimpleAuthService() { //массив логинов, паролей, никнеймов
         users = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             users.add(new UserData("" + i, "" + i, "Nickname" + i));
         }
-    }*/
+    }
 
-    public static void fillingTheDatabase() throws SQLException {
+    public void fillingTheDatabase() throws SQLException {
         try {
+            connection.setAutoCommit(false);
             psInsert = connection.prepareStatement("INSERT INTO users (nickname, login, password) VALUES (?,?,?)");
             for (int i = 1; i <= 10; i++) {
 
                 psInsert.setString(1, "Nickname" + i);
                 psInsert.setString(2, "" + i);
                 psInsert.setString(3, "" + i);
-                psInsert.addBatch();
+                psInsert.executeUpdate();
             }
             connection.setAutoCommit(true);
-
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
+        /*public void fillingTheDatabase() throws SQLException {
+        try {
+            for (int i = 1; i <= 10; i++) {
+                stmt.executeUpdate(String.format("INSERT INTO users (nickname, login, password) VALUES ('%s', '%s', '%s')",
+                        "Nickname" + i, i, i));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }*/
 
-    public static void changeNickname (String nickname, String newNickname) throws SQLException {
+    public void changeNickname(String nickname, String newNickname) throws SQLException {
         stmt.executeUpdate(String.format("UPDATE users SET nickname = '%s' WHERE nickname = '%s'", newNickname, nickname));
     }
 
-
     @Override
+    public String getNickByLoginAndPassword(String login, String password) {
+        String nick = null;
+        ResultSet rs; //ищет никнейм
+        System.out.println("Получены логин и пароль: " + login + "" + password);
+        try {
+            rs = stmt.executeQuery(String.format("SELECT nickname, login FROM users " +
+                    "WHERE login = '%s' AND password = '%s'", login, password));
+
+            while (rs.next()) {
+                nick = rs.getString("nickname");
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            return nick;
+        }
+    }
+
+
+/*    @Override
     public String getNickByLoginAndPassword(String login, String password) {
         for (UserData o : users) {
             if (o.login.equals(login) && o.password.equals(password)) {
@@ -65,29 +98,6 @@ public class SimpleAuthService implements AuthService {
             }
         }
         return null;
-    }
-
-
-    public static void connect() throws ClassNotFoundException, SQLException { //для подключения к БД
-        /*Class.forName("org.sqlite.JDBC");*/
-
-        DriverManager.registerDriver(new JDBC());
-        connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\Natas\\IdeaProjects\\ChatDB\\server\\src\\main\\java\\server\\chatUsers.db");
-        stmt = connection.createStatement();
-    }
-
-    public static void disconnect() {
-        try {
-            stmt.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        try {
-            connection.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
+    }*/
 
 }

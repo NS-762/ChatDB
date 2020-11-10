@@ -38,11 +38,11 @@ public class ClientHandler {
                 try {
                     while (true) { //цикл аутентификации
                         String str = in.readUTF();
-
                         if (str.startsWith("/auth")) {
                             String[] token = str.split(" ");
                             if (token.length == 3) {
                                 String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
+
                                 if (nick != null) {
                                     sendMessageClient("/authok " + nick);
                                     nickname = nick;

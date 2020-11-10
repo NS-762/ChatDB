@@ -1,42 +1,62 @@
 package server;
 
+import org.sqlite.JDBC;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.Scanner;
 import java.util.Vector;
 
 public class Server {
+
+    private AuthService authService;
+
+    public AuthService getAuthService() { //????
+        return authService;
+    }
 
     private ServerSocket server = null;
     private Socket socket = null;
     private Scanner scan;
     private String str;
     private Vector<ClientHandler> clients;
-    private AuthService authService;
+    private SimpleAuthService simpleAuthService;
 
-    public AuthService getAuthService() {
-        return authService;
+
+
+
+    private static Connection connection;
+    private static Statement stmt;
+    private static PreparedStatement psInsert;
+
+    public SimpleAuthService getSimpleAuthService() {
+        return simpleAuthService;
     }
+
+
+
 
     public Server() {
 
         try {
-            authService = new SimpleAuthService(); //для аутентификации
+             //для аутентификации
+
             clients = new Vector<>();
             scan = new Scanner(System.in);
             server = new ServerSocket(8191); //создание сервера
 
             try {
-                SimpleAuthService.connect(); //подключение сервера к БД
+                connectDatabase(); //подключение сервера к БД
                 System.out.println("Подключились к БД");
-                SimpleAuthService.fillingTheDatabase();
+
+                simpleAuthService = new SimpleAuthService(connection, stmt, psInsert);
+                simpleAuthService.fillingTheDatabase(); //заполнение БД
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
-
 
             System.out.println("Сервер запустился");
 
@@ -102,8 +122,34 @@ public class Server {
         System.out.println(str);
     }
 
-    public void changeNickname() {
+    public static void connectDatabase() throws ClassNotFoundException, SQLException { //для подключения к БД
+        /*Class.forName("org.sqlite.JDBC");*/
 
+        DriverManager.registerDriver(new JDBC());
+        connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\Natas\\IdeaProjects\\ChatDB\\server\\src\\main\\java\\server\\chatUsers.db");
+        stmt = connection.createStatement();
     }
+
+    public static void disconnectDatabase() {
+        try {
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        try {
+            connection.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void changeNickname(String nickname, String newNickname) throws SQLException {
+        simpleAuthService.changeNickname(nickname, newNickname);
+    }
+
+/*    public String getNickByLoginAndPassword(String login, String password) {
+        return simpleAuthService.getNickByLoginAndPassword(login, password);
+    }*/
+
 
 }

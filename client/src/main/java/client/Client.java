@@ -83,9 +83,9 @@ public class Client {
 
                     while (!authenticated) { //цикл аутентификации
                         String str = scan.nextLine();
-                        if (!authenticated)
+                        if (!authenticated) {
                             out.writeUTF("/auth " + str); //прекинуть в клиентхендлер логин и пароль
-                        else {
+                        } else {
                             out.writeUTF(str);
                             break;
                         }
