@@ -1,12 +1,11 @@
 package server;
 
-import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class ClientHandler {
@@ -42,11 +41,7 @@ public class ClientHandler {
                             String[] token = str.split(" ");
                             if (token.length == 3) {
 
-
-                                String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]); // Вот так не рабоатет
-
-                                /*String nick = server.getSimpleAuthService().getNickByLoginAndPassword(token[1], token[2]);*/ // Вот так работает
-
+                                String nick = server.getSimpleAuthService().getNickByLoginAndPassword(token[1], token[2]);
 
                                 if (nick != null) {
                                     sendMessageClient("/authok " + nick);
@@ -73,9 +68,26 @@ public class ClientHandler {
                             sendMessageClient(str); //отправить клиенту сообщение о закрытии
                             break;
                         }
+
                         if (str.startsWith("/w")) { //для личных сообщений
                             String[] privateMessage = str.split(" ", 3); //делим на 3 части
                             server.sendPrivateMessage(privateMessage[1], nickname + "(лс): " + privateMessage[2]);
+                        } else if (str.startsWith("/changeNickname")) { //запрос на смену ника
+
+                            String[] nicknameChangeRequest = str.split(" ");
+                            if (nicknameChangeRequest.length == 2) {
+                                try {
+                                    server.getSimpleAuthService().changeNickname(nickname, nicknameChangeRequest[1]);
+                                    sendMessageClient("Вы удачно сменили никнейм, ваш новый никнейм: " + nicknameChangeRequest[1]);
+                                    sendMessageClient("/newNickname " + nicknameChangeRequest[1]);
+                                    nickname = nicknameChangeRequest[1];
+                                } catch (SQLException throwables) {
+                                    sendMessageClient("Невозможно сменить никнейм");
+                                }
+                            } else {
+                                sendMessageClient("Ошибка ввода");
+                            }
+
                         } else { //для отправки всем пользователям
                             server.acceptAndSendMessage(nickname + ": " + str); // перекинуть сообщение на сервер
                         }

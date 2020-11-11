@@ -56,13 +56,15 @@ public class Client {
                                 throw new IOException();
                             }
 
-
                             if (str.equals("/end")) {
                                 System.out.println("Отключение от сервера");
                                 out.writeUTF(str); //чтобы вырубился и на клиентхендлере
                                 break;
+                            } if (str.startsWith("/newNickname")) { //для смены ника
+                                nickname = str.split(" ")[1];
+                            } else {
+                                System.out.println(str);
                             }
-                            System.out.println(str);
                         }
                     }
                 } catch (IOException e) {
