@@ -15,12 +15,7 @@ public class Server {
     private Vector<ClientHandler> clients;
     private Database database;
 
-    private SimpleAuthService simpleAuthService;
     private AuthService authService;
-
-/*    public SimpleAuthService getSimpleAuthService() {
-        return simpleAuthService;
-    }*/
 
     public AuthService getAuthService() {
         return authService;
