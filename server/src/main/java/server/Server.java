@@ -16,9 +16,14 @@ public class Server {
     private Database database;
 
     private SimpleAuthService simpleAuthService;
+    private AuthService authService;
 
-    public SimpleAuthService getSimpleAuthService() {
+/*    public SimpleAuthService getSimpleAuthService() {
         return simpleAuthService;
+    }*/
+
+    public AuthService getAuthService() {
+        return authService;
     }
 
     public Server(Database database) {
@@ -35,7 +40,7 @@ public class Server {
                 System.out.println("Подключились к БД");
                 database.fillingTheDatabase(); //заполнение БД
 
-                simpleAuthService = new SimpleAuthService(database);
+                authService = new DBAuthService(database);
             } catch (Exception e) {
                 e.printStackTrace();
             }

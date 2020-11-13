@@ -1,16 +1,12 @@
 package server;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleAuthService implements AuthService {
 
-    private Database database;
-
-    public SimpleAuthService(Database database) {
-        this.database = database;
-    }
-
-/*    private class UserData {
+    private class UserData {
         String login;
         String password;
         String nickname;
@@ -20,30 +16,30 @@ public class SimpleAuthService implements AuthService {
             this.password = password;
             this.nickname = nickname;
         }
-    }*/
+    }
 
-    public void changeNickname(String nickname, String newNickname) throws SQLException {
-        database.getStmt().executeUpdate(String.format("UPDATE users SET nickname = '%s' WHERE nickname = '%s'",
-                newNickname, nickname));
+    private List<UserData> users;
+
+    public SimpleAuthService() { //массив логинов, паролей, никнеймов
+        users = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            users.add(new UserData("" + i, "" + i, "Nickname" + i));
+        }
     }
 
     @Override
     public String getNickByLoginAndPassword(String login, String password) {
-        String nick = null;
-        ResultSet rs; //ищет никнейм
-        try {
-            rs = database.getStmt().executeQuery(String.format("SELECT nickname, login FROM users " +
-                    "WHERE login = '%s' AND password = '%s'", login, password));
-            while (rs.next()) {
-                nick = rs.getString("nickname");
+        for (UserData o : users) {
+            if (o.login.equals(login) && o.password.equals(password)) {
+                return o.nickname;
             }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } finally {
-            System.out.println(nick);
-            return nick;
         }
+        return null;
+    }
+
+    @Override
+    public void changeNickname(String nickname, String newNickname) throws SQLException {
+
     }
 
 }

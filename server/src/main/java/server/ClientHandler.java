@@ -41,7 +41,7 @@ public class ClientHandler {
                             String[] token = str.split(" ");
                             if (token.length == 3) {
 
-                                String nick = server.getSimpleAuthService().getNickByLoginAndPassword(token[1], token[2]);
+                                String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
 
                                 if (nick != null) {
                                     sendMessageClient("/authok " + nick);
@@ -77,7 +77,7 @@ public class ClientHandler {
                             String[] nicknameChangeRequest = str.split(" ");
                             if (nicknameChangeRequest.length == 2) {
                                 try {
-                                    server.getSimpleAuthService().changeNickname(nickname, nicknameChangeRequest[1]);
+                                    server.getAuthService().changeNickname(nickname, nicknameChangeRequest[1]);
                                     sendMessageClient("Вы удачно сменили никнейм, ваш новый никнейм: " + nicknameChangeRequest[1]);
                                     sendMessageClient("/newNickname " + nicknameChangeRequest[1]);
                                     nickname = nicknameChangeRequest[1];
