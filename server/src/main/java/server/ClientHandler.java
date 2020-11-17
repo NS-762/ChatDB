@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ClientHandler {
@@ -18,7 +19,6 @@ public class ClientHandler {
     private String login;
     public String nickname;
     private boolean subscribe = false;
-
 
     public ClientHandler(Server server, Socket socket) {
         this.server = server;
@@ -40,16 +40,17 @@ public class ClientHandler {
                         if (str.startsWith("/auth")) {
                             String[] token = str.split(" ");
                             if (token.length == 3) {
-
                                 String nick = server.getAuthService().getNickByLoginAndPassword(token[1], token[2]);
-
                                 if (nick != null) {
-                                    sendMessageClient("/authok " + nick);
                                     nickname = nick;
                                     login = token[1];
+                                    sendMessageClient("/authok " + nickname + " " + login); //отправить клиенту его ник и логин
+
                                     server.subscribe(this); //добавить клиента в список
                                     subscribe = true;
-                                    server.acceptAndSendMessage(nickname + " подключился к чату"); // перекинуть сообщение на сервер
+                                    sendMessageClient("Вы успешно подключились к чату");
+//                                    server.acceptAndSendMessage(nickname + " подключился к чату"); // перекинуть сообщение на сервер
+                                    sendLastMessagesClient();
                                     break;
                                 } else {
                                     sendMessageClient("/error");
@@ -90,13 +91,14 @@ public class ClientHandler {
 
                         } else { //для отправки всем пользователям
                             server.acceptAndSendMessage(nickname + ": " + str); // перекинуть сообщение на сервер
+
                         }
 
                     }
                 } catch (SocketTimeoutException e) {
                     sendMessageClient("/timeOut"); //отправить сообщение, что время ожидания вышло
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 } finally {
                     try {
                         if (subscribe) { //если клиент был подписан на сервер, то удалить из подписок
@@ -123,5 +125,16 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendLastMessagesClient() { //отправить клиенту 100 последних сообщений
+        sendMessageClient("-------------------------------");
+        sendMessageClient("История сообщений:");
+        ArrayList<String> lastMessages = server.getLastMessages(); //получить у сервера список сообщений
+        for (String str : lastMessages) { //и отослать эти сообщения клиенту
+            sendMessageClient(str);
+        }
+        sendMessageClient("-------------------------------");
+
     }
 }

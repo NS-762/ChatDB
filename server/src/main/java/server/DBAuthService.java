@@ -30,7 +30,6 @@ public class DBAuthService implements AuthService {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
-            System.out.println(nick);
             return nick;
         }
     }

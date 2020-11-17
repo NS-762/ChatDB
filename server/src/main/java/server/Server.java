@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -14,6 +15,8 @@ public class Server {
     private String str;
     private Vector<ClientHandler> clients;
     private Database database;
+
+    private ArrayList<String> lastMessages;
 
     private AuthService authService;
 
@@ -29,6 +32,8 @@ public class Server {
             clients = new Vector<>();
             scan = new Scanner(System.in);
             server = new ServerSocket(8191); //создание сервера
+
+            lastMessages = new ArrayList<>();
 
             try {
                 database.connectDatabase(); //подключение сервера к БД
@@ -46,11 +51,22 @@ public class Server {
                 while (true) {
                     str = scan.nextLine();
 
+                    if (str.equals("/info")) {
+                        System.out.println(lastMessages);
+                        continue;
+                    } else if (!str.equals("/end")) {
+                        if (lastMessages.size() == 100) {
+                            lastMessages.remove(0);
+                        }
+                        lastMessages.add("Сервер пишет: " + str); //будет добавлять сообщение в историю последних ста сообщений
+                    }
+
                     for (ClientHandler c : clients) {
                         if (!str.equals("/end")) { //чтоб правильно считалась команда на клиентхендлере
                             c.sendMessageClient("Сервер пишет: " + str);
+
                         } else {
-                            c.sendMessageClient( str);
+                            c.sendMessageClient(str);
                         }
                     }
                 }
@@ -77,10 +93,16 @@ public class Server {
         }
     }
 
-    public void acceptAndSendMessage(String message) { //принять сообщение, напечатать и отправить всем клиентам
-        System.out.println(message);
+    public void acceptAndSendMessage(String str) { //принять сообщение, напечатать и отправить всем клиентам
+        System.out.println(str);
+
+        if (lastMessages.size() == 100) {
+            lastMessages.remove(0);
+        }
+        lastMessages.add(str); //будет добавлять сообщение в историю последних ста сообщений
+
         for (ClientHandler c : clients) {
-            c.sendMessageClient(message);
+            c.sendMessageClient(str);
         }
     }
 
@@ -100,5 +122,10 @@ public class Server {
         clients.remove(clientHandler);
         System.out.printf("Клиент %s отключился\n", nickname);
     }
+
+    public ArrayList<String> getLastMessages() {
+        return lastMessages;
+    }
+
 
 }

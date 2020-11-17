@@ -1,8 +1,6 @@
 package client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Scanner;
@@ -12,9 +10,12 @@ public class Client {
     private static Socket socket = null;
     private static DataInputStream in;
     private static DataOutputStream out;
+    private static FileOutputStream outFile;
     private static Scanner scan;
     private static boolean authenticated;
     private static String nickname;
+    private static String login;
+    private static File messageHistory;
 
     public static void main(String[] args) {
 
@@ -37,6 +38,7 @@ public class Client {
                         str = in.readUTF();
                         if (str.startsWith("/authok")) { //если пришло одобрение, то выходим из этого цикла: аутентиф. успешна
                             nickname = str.split(" ")[1]; //взять то, что после /authok
+                            login = str.split(" ")[2];
                             authenticated = true;
                             break;
                         } else if (str.equals("/timeOut")) { //время аутентификации вышло
@@ -48,6 +50,11 @@ public class Client {
                     }
 
                     if (!str.equals("/timeOut")) { //сюда заходит, только если время аутентификации не вышло
+
+                        messageHistory = new File(String.format("client\\src\\main\\java\\client\\history_%s.txt", login));
+                        messageHistory.createNewFile(); //если уже есть такой файл, он не создасться
+
+                        outFile =  new FileOutputStream(messageHistory, true);
                         while (true) { //цикл работы
 
                             try {
@@ -62,21 +69,28 @@ public class Client {
                                 break;
                             } if (str.startsWith("/newNickname")) { //для смены ника
                                 nickname = str.split(" ")[1];
+
+
                             } else {
                                 System.out.println(str);
+                                str += "\n";
+                                outFile.write(str.getBytes()); //записать сообщение в файл
                             }
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    try {
-                        in.close();
+                    /*try {
+                        *//*in.close();
                         out.close();
                         socket.close();
+                        outFile.close();
+                        messageHistory.delete();
+                        System.out.println("Все закрыли 1");*//*
                     } catch (Exception e) {
                         e.printStackTrace();
-                    }
+                    }*/
                 }
             }).start();
 
@@ -102,19 +116,35 @@ public class Client {
                 } catch (IOException e) {
                     System.out.println("Ошибка отправки");
                 } finally {
-                    try {
-                        in.close();
+                    /*try {
+                        *//*in.close();
                         out.close();
                         socket.close();
+                        outFile.close();
+                        messageHistory.delete();
+                        System.out.println("Все закрыли 2");*//*
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-
+                    }*/
                 }
             }).start();
+
+            while (!socket.isClosed()) {
+
+            }
         } catch (Exception e) {
             e.printStackTrace();
 
+        } finally {
+            try {
+                in.close();
+                out.close();
+                socket.close();
+                outFile.close();
+//                messageHistory.delete(); //удалять ли историю сообщений после выхода?
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

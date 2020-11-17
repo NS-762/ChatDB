@@ -12,7 +12,7 @@ public class Database {
 
     public void connectDatabase() throws SQLException { //для подключения к БД
         DriverManager.registerDriver(new JDBC());
-        connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\Natas\\IdeaProjects\\ChatDB\\server\\src\\main\\java\\server\\chatUsers.db");
+        connection = DriverManager.getConnection("jdbc:sqlite:server\\src\\main\\java\\server\\chatUsers.db");
         stmt = connection.createStatement();
     }
 
