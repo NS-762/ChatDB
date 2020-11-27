@@ -93,16 +93,16 @@ public class Server {
         }
     }
 
-    public void acceptAndSendMessage(String str) { //принять сообщение, напечатать и отправить всем клиентам
-        System.out.println(str);
+    public void acceptAndSendMessage(String message) { //принять сообщение, напечатать и отправить всем клиентам
+        System.out.println(message); //кроме того, который его отправил
 
         if (lastMessages.size() == 100) {
             lastMessages.remove(0);
         }
-        lastMessages.add(str); //будет добавлять сообщение в историю последних ста сообщений
+        lastMessages.add(message); //будет добавлять сообщение в историю последних ста сообщений
 
         for (ClientHandler c : clients) {
-            c.sendMessageClient(str);
+            c.sendMessageClient(message);
         }
     }
 

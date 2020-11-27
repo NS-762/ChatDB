@@ -10,12 +10,11 @@ public class Client {
     private static Socket socket = null;
     private static DataInputStream in;
     private static DataOutputStream out;
-    private static FileOutputStream outFile;
     private static Scanner scan;
     private static boolean authenticated;
     private static String nickname;
     private static String login;
-    private static File messageHistory;
+    private static History history;
 
     public static void main(String[] args) {
 
@@ -51,10 +50,13 @@ public class Client {
 
                     if (!str.equals("/timeOut")) { //сюда заходит, только если время аутентификации не вышло
 
-                        messageHistory = new File(String.format("client\\src\\main\\java\\client\\history_%s.txt", login));
-                        messageHistory.createNewFile(); //если уже есть такой файл, он не создасться
+                        history = new History(login);
 
-                        outFile =  new FileOutputStream(messageHistory, true);
+                        System.out.println("-------------------------------");
+                        System.out.println("\tВаши старые сообщения:");
+                        System.out.print(history.getLastMyMessages());
+                        System.out.println("-------------------------------");
+
                         while (true) { //цикл работы
 
                             try {
@@ -69,28 +71,15 @@ public class Client {
                                 break;
                             } if (str.startsWith("/newNickname")) { //для смены ника
                                 nickname = str.split(" ")[1];
-
-
                             } else {
                                 System.out.println(str);
                                 str += "\n";
-                                outFile.write(str.getBytes()); //записать сообщение в файл
+                                history.writingToFile(str); //записать сообщение в файл
                             }
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    /*try {
-                        *//*in.close();
-                        out.close();
-                        socket.close();
-                        outFile.close();
-                        messageHistory.delete();
-                        System.out.println("Все закрыли 1");*//*
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }*/
                 }
             }).start();
 
@@ -106,7 +95,6 @@ public class Client {
                             break;
                         }
                     }
-
                     while (true) { //цикл работы
                         String str = scan.nextLine();
                         if (!str.equals("")) {
@@ -115,23 +103,12 @@ public class Client {
                     }
                 } catch (IOException e) {
                     System.out.println("Ошибка отправки");
-                } finally {
-                    /*try {
-                        *//*in.close();
-                        out.close();
-                        socket.close();
-                        outFile.close();
-                        messageHistory.delete();
-                        System.out.println("Все закрыли 2");*//*
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }*/
                 }
             }).start();
 
-            while (!socket.isClosed()) {
-
+            while (!socket.isClosed()) { //чтобы не вызвался блок finally
             }
+
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -140,8 +117,7 @@ public class Client {
                 in.close();
                 out.close();
                 socket.close();
-                outFile.close();
-//                messageHistory.delete(); //удалять ли историю сообщений после выхода?
+                history.stop();
             } catch (IOException e) {
                 e.printStackTrace();
             }

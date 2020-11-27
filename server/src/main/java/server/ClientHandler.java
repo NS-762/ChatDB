@@ -48,9 +48,9 @@ public class ClientHandler {
 
                                     server.subscribe(this); //добавить клиента в список
                                     subscribe = true;
-                                    sendMessageClient("Вы успешно подключились к чату");
+//                                    sendMessageClient("Вы успешно подключились к чату");
 //                                    server.acceptAndSendMessage(nickname + " подключился к чату"); // перекинуть сообщение на сервер
-                                    sendLastMessagesClient();
+//                                    sendLastMessagesClient();
                                     break;
                                 } else {
                                     sendMessageClient("/error");
