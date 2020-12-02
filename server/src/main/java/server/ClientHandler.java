@@ -127,14 +127,14 @@ public class ClientHandler {
         }
     }
 
-    public void sendLastMessagesClient() { //отправить клиенту 100 последних сообщений
-        sendMessageClient("-------------------------------");
-        sendMessageClient("История сообщений:");
-        ArrayList<String> lastMessages = server.getLastMessages(); //получить у сервера список сообщений
-        for (String str : lastMessages) { //и отослать эти сообщения клиенту
-            sendMessageClient(str);
-        }
-        sendMessageClient("-------------------------------");
-
-    }
+//    public void sendLastMessagesClient() { //отправить клиенту 100 последних сообщений
+//        sendMessageClient("-------------------------------");
+//        sendMessageClient("История сообщений:");
+//        ArrayList<String> lastMessages = server.getLastMessages(); //получить у сервера список сообщений
+//        for (String str : lastMessages) { //и отослать эти сообщения клиенту
+//            sendMessageClient(str);
+//        }
+//        sendMessageClient("-------------------------------");
+//
+//    }
 }

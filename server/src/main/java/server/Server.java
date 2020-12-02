@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
 
@@ -16,6 +18,7 @@ public class Server {
     private Vector<ClientHandler> clients;
     private Database database;
 
+    private ExecutorService executorService;
     private ArrayList<String> lastMessages;
 
     private AuthService authService;
@@ -28,11 +31,9 @@ public class Server {
 
         try {
             this.database = database;
-
             clients = new Vector<>();
             scan = new Scanner(System.in);
             server = new ServerSocket(8191); //создание сервера
-
             lastMessages = new ArrayList<>();
 
             try {
@@ -44,10 +45,11 @@ public class Server {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             System.out.println("Сервер запустился");
 
-            new Thread(() -> { //поток для отправки сообщений на клиентхендлеры
+
+            executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(() -> {
                 while (true) {
                     str = scan.nextLine();
 
@@ -70,7 +72,32 @@ public class Server {
                         }
                     }
                 }
-            }).start();
+            });
+
+            /*new Thread(() -> { //поток для отправки сообщений на клиентхендлеры
+                while (true) {
+                    str = scan.nextLine();
+
+                    if (str.equals("/info")) {
+                        System.out.println(lastMessages);
+                        continue;
+                    } else if (!str.equals("/end")) {
+                        if (lastMessages.size() == 100) {
+                            lastMessages.remove(0);
+                        }
+                        lastMessages.add("Сервер пишет: " + str); //будет добавлять сообщение в историю последних ста сообщений
+                    }
+
+                    for (ClientHandler c : clients) {
+                        if (!str.equals("/end")) { //чтоб правильно считалась команда на клиентхендлере
+                            c.sendMessageClient("Сервер пишет: " + str);
+
+                        } else {
+                            c.sendMessageClient(str);
+                        }
+                    }
+                }
+            }).start();*/
 
             while (true) { //для добавления клиентов
                 try {
@@ -86,6 +113,7 @@ public class Server {
         } finally {
             try {
                 database.disconnectDatabase();
+                executorService.shutdown();
                 server.close();
             } catch (IOException e) {
                 e.printStackTrace();
